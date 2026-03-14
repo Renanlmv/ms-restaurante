@@ -34,6 +34,7 @@ public class Restaurante {
     private String uf;
 
     // relacionamento
+    // tabela tb_restaurante envia a pk(id) para a tb_reserva como fk
     @OneToMany(mappedBy = "restaurante", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Reserva> reservas = new ArrayList<>();
 }
