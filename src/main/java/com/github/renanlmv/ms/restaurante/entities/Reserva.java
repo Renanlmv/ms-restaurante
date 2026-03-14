@@ -19,12 +19,19 @@ public class Reserva {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "data_reserva", nullable = false)
     private LocalDate dataReserva;
+
+    @Column(name = "nome_cliente", nullable = false, length = 100)
     private String nomeCliente;
+
+    @Column(name = "qtd_pessoas", nullable = false)
     private Integer qtdePessoas;
 
     // relacionamento
+    // tabela tb_reserva recebe a pk(id) da tb_restaurante como fk
     @ManyToOne
-    @JoinColumn(name = "restaurante_id")
+    @JoinColumn(name = "restaurante_id", nullable = false, foreignKey = @ForeignKey(name = "fk_reserva_restaurante"))
     private Restaurante restaurante;
 }
