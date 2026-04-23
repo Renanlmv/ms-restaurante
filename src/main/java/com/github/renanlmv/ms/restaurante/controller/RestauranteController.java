@@ -1,7 +1,10 @@
 package com.github.renanlmv.ms.restaurante.controller;
 
+import com.github.renanlmv.ms.restaurante.dto.ReservaDTO;
 import com.github.renanlmv.ms.restaurante.dto.RestauranteDTO;
+import com.github.renanlmv.ms.restaurante.service.ReservaService;
 import com.github.renanlmv.ms.restaurante.service.RestauranteService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +20,11 @@ public class RestauranteController {
     // autowired pra injetar as dependências certas (não precisar fazer o new)
     @Autowired
     RestauranteService restauranteService;
+
+    @Autowired
+    ReservaService reservaService;
+
+    // CRUD de Restaurantes
 
     // getmapping para mapear que esse metodo é get
     @GetMapping
@@ -38,14 +46,14 @@ public class RestauranteController {
 
     // postmapping para mapear que esse metodo é post
     @PostMapping
-    public ResponseEntity<RestauranteDTO> createRestaurante (@RequestBody RestauranteDTO restauranteDTO) {
+    public ResponseEntity<RestauranteDTO> createRestaurante (@RequestBody @Valid RestauranteDTO restauranteDTO) {
 
         restauranteDTO = restauranteService.saveRestaurante(restauranteDTO);
 
         // para aparecer na uri o local que o elemento foi inserido
         URI uri = ServletUriComponentsBuilder
                 .fromCurrentRequestUri()
-                .path("/{id")
+                .path("/{id}")
                 .buildAndExpand(restauranteDTO.getId())
                 .toUri();
 
@@ -55,7 +63,7 @@ public class RestauranteController {
 
     @PutMapping("/{id}")
     public ResponseEntity<RestauranteDTO> updateRestaurante (@PathVariable Long id,
-                                                             @RequestBody RestauranteDTO restauranteDTO) {
+                                                             @RequestBody @Valid RestauranteDTO restauranteDTO) {
 
         restauranteDTO = restauranteService.updateRestaurante(id, restauranteDTO);
         return ResponseEntity.ok(restauranteDTO);
@@ -67,6 +75,53 @@ public class RestauranteController {
         restauranteService.deleteRestaurante(id);
 
         // noContent retorna status 204(No Content) no Insomnia
+        return ResponseEntity.noContent().build();
+    }
+
+    // CRUD de Reservas
+
+    @GetMapping("/{restauranteId}/reservas")
+    public ResponseEntity<List<ReservaDTO>> getAllReservas(@PathVariable Long restauranteId) {
+
+        List<ReservaDTO> list = reservaService.findAllReservasByRestauranteId(restauranteId);
+
+        return ResponseEntity.ok(list);
+    }
+
+    @GetMapping("/{restauranteId}/reservas/{reservaId}")
+    public ResponseEntity<ReservaDTO> getReservaById(@PathVariable Long restauranteId, @PathVariable Long reservaId) {
+
+        ReservaDTO reservaDTO = reservaService.findReservaById(restauranteId, reservaId);
+
+        return ResponseEntity.ok(reservaDTO);
+    }
+
+    @PostMapping("/{restauranteId}/reservas")
+    public ResponseEntity<ReservaDTO> createReserva(@PathVariable Long restauranteId, @RequestBody @Valid ReservaDTO reservaDTO) {
+
+        reservaDTO = reservaService.saveReserva(restauranteId, reservaDTO);
+
+        URI uri = ServletUriComponentsBuilder
+                .fromCurrentRequestUri()
+                .path("/{reservaId}")
+                .buildAndExpand(reservaDTO.getId())
+                .toUri();
+
+        return ResponseEntity.created(uri).body(reservaDTO);
+    }
+
+    @PutMapping("/{restauranteId}/reservas/{reservaId}")
+    public ResponseEntity<ReservaDTO> updateReserva(@PathVariable Long restauranteId, @PathVariable Long reservaId, @RequestBody @Valid ReservaDTO reservaDTO) {
+
+        reservaDTO = reservaService.updateReserva(restauranteId, reservaId, reservaDTO);
+        return ResponseEntity.ok(reservaDTO);
+    }
+
+    @DeleteMapping("/{restauranteId}/reservas/{reservaId}")
+    public ResponseEntity<Void> deleteReserva(@PathVariable Long restauranteId, @PathVariable Long reservaId) {
+
+        reservaService.deleteReserva(restauranteId, reservaId);
+
         return ResponseEntity.noContent().build();
     }
 }
