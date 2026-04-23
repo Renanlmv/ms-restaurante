@@ -2,9 +2,11 @@ package com.github.renanlmv.ms.restaurante.service;
 
 import com.github.renanlmv.ms.restaurante.dto.RestauranteDTO;
 import com.github.renanlmv.ms.restaurante.entities.Restaurante;
+import com.github.renanlmv.ms.restaurante.exceptions.DatabaseException;
 import com.github.renanlmv.ms.restaurante.exceptions.ResourceNotFoundException;
 import com.github.renanlmv.ms.restaurante.repositories.RestauranteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +25,17 @@ public class RestauranteService {
     @Transactional(readOnly = true)
     public List<RestauranteDTO> findAllRestaurantes() {
 
-        return restauranteRepository.findAll().stream().map(RestauranteDTO::new).toList();
+        // pega todos os restaurantes do banco e retorna uma lista de DTOs
+        // return restauranteRepository.findAll().stream().map(RestauranteDTO::new).toList();
+
+        // Validar se a lista estiver vazia
+        List<Restaurante> restaurantes = restauranteRepository.findAll();
+
+        if (restaurantes.isEmpty()) {
+            throw new ResourceNotFoundException("Nenhum restaurante cadastrado.");
+        }
+
+        return restaurantes.stream().map(RestauranteDTO::new).toList();
     }
 
     @Transactional(readOnly = true)
@@ -32,7 +44,7 @@ public class RestauranteService {
         // se no erro aparecer que o "Provided" é Optional, é porque não é garantido que o resultado -
         // - vai vir como o esperado, então tem que colocar um else (orElseThrow)
         Restaurante restaurante = restauranteRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException("Recurso não encontrado. ID: " + id)
+                () -> new ResourceNotFoundException("Restaurante não encontrado. ID: " + id)
         );
 
         return new RestauranteDTO(restaurante);
@@ -41,11 +53,14 @@ public class RestauranteService {
     @Transactional
     public RestauranteDTO saveRestaurante (RestauranteDTO restauranteDTO) {
 
-        Restaurante restaurante = new Restaurante();
-        mapDtoToRestaurante(restaurante, restauranteDTO);
-        restaurante = restauranteRepository.save(restaurante);
-
-        return new RestauranteDTO(restaurante);
+        try {
+            Restaurante restaurante = new Restaurante();
+            mapDtoToRestaurante(restaurante, restauranteDTO);
+            restaurante = restauranteRepository.save(restaurante);
+            return new RestauranteDTO(restaurante);
+        } catch (DataAccessException e) {
+            throw new DatabaseException("Não foi possível salvar o restaurante.");
+        }
     }
 
     public void mapDtoToRestaurante (Restaurante restaurante, RestauranteDTO restauranteDTO) {
@@ -59,11 +74,14 @@ public class RestauranteService {
     @Transactional
     public RestauranteDTO updateRestaurante (Long id, RestauranteDTO restauranteDTO) {
 
-        Restaurante restaurante = restauranteRepository.getReferenceById(id);
-        mapDtoToRestaurante(restaurante, restauranteDTO);
-        restaurante = restauranteRepository.save(restaurante);
-
-        return new RestauranteDTO(restaurante);
+        try {
+            Restaurante restaurante = restauranteRepository.getReferenceById(id);
+            mapDtoToRestaurante(restaurante, restauranteDTO);
+            restaurante = restauranteRepository.save(restaurante);
+            return new RestauranteDTO(restaurante);
+        } catch (DataAccessException e) {
+            throw new DatabaseException("Não foi possível atualizar o restaurante.");
+        }
     }
 
     @Transactional
@@ -72,7 +90,7 @@ public class RestauranteService {
         // verifica se o restaurante não existe
         // Se não existir, lança exceção
         if (!restauranteRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Recurso não encontrado. ID: " + id);
+            throw new ResourceNotFoundException("Restaurante não encontrado. ID: " + id);
         }
 
         restauranteRepository.deleteById(id);
