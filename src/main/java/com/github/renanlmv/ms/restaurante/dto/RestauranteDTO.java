@@ -2,7 +2,6 @@ package com.github.renanlmv.ms.restaurante.dto;
 
 import com.github.renanlmv.ms.restaurante.entities.Restaurante;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,6 +28,7 @@ public class RestauranteDTO {
     private String cidade;
 
     @NotBlank(message = "Unidade Federativa é requerido")
+    @Size(min = 2, max = 2, message = "A Unidade Federativa em que fica a cidade deve ter 2 caracteres")
     private String uf;
 
     public RestauranteDTO(Restaurante restaurante) {
