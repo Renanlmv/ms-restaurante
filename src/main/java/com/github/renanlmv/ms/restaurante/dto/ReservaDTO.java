@@ -2,10 +2,14 @@ package com.github.renanlmv.ms.restaurante.dto;
 
 import com.github.renanlmv.ms.restaurante.entities.Reserva;
 import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 public class ReservaDTO {
 
@@ -24,14 +28,14 @@ public class ReservaDTO {
     @Positive(message = "Quantidade de pessoas deve ser um número inteiro maior que zero")
     private Integer qtdePessoas;
 
-    @NotNull(message = "Restaurante é obrigatório")
-    private RestauranteDTO restaurante;
+//    @NotNull(message = "Restaurante é obrigatório")
+//    private Restaurante restaurante;
 
-//    public ReservaDTO (Reserva reserva) {
-//        id = reserva.getId();
-//        dataReserva = reserva.getDataReserva();
-//        nomeCliente = reserva.getNomeCliente();
-//        qtdePessoas = reserva.getQtdePessoas();
+    public ReservaDTO (Reserva reserva) {
+        id = reserva.getId();
+        dataReserva = reserva.getDataReserva();
+        nomeCliente = reserva.getNomeCliente();
+        qtdePessoas = reserva.getQtdePessoas();
 //        restaurante = reserva.getRestaurante();
-//    }
+    }
 }
